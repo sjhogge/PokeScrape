@@ -2,6 +2,7 @@ import requests
 import json
 import math
 import time
+import pandas as pd
 
 # use this to gauge how often we are calling the API
 # because we are limited to 300 calls per minute
@@ -173,6 +174,7 @@ def generate_all_set_data(access_token, set_name, write_to_file):
     for i in price_info:
       if i["productId"] == j["productId"] and (i["marketPrice"] is not None or i["lowPrice"] is not None or i["midPrice"] is not None or i["highPrice"] is not None):
         i.update(j)
+        i["setName"] = set_name
         all_data.append(i)
   all_data_f = json.dumps(all_data, indent=2)
   # print(all_data_f)
@@ -189,14 +191,31 @@ if __name__ == "__main__":
   ACCESS_TOKEN = get_current_access_token()
   set_name = "SM Promos"
   write_set_to_file = False
+  write_all_sets_to_file = True
   
   start_time = int(round(time.time() * 1000))
   all_sets_list = get_all_sets(ACCESS_TOKEN)
+  all_sets_data = []
+
   for i in all_sets_list:
     print(i)
-    generate_all_set_data(ACCESS_TOKEN, i, write_set_to_file)
+    current_set_data = generate_all_set_data(ACCESS_TOKEN, i, write_set_to_file)
+    if current_set_data is not None:
+     all_sets_data = all_sets_data + current_set_data
     print ("-----")
-    # time.sleep(0.25) # Make sure to limit the number of API calls just in case
+
+  if write_all_sets_to_file:
+    filename = "AllSetsData"
+    filename_json = filename + ".json"
+    filename_csv = filename + ".csv"
+    f = open(filename_json, "w")
+    all_sets_data_f = json.dumps(all_sets_data, indent=2)
+    f.write(all_sets_data_f)
+    f.close()
+    df = pd.read_json(filename_json)
+    df.to_csv(filename_csv, index=None)
+    print("Data written for all sets")
+
   end_time = int(round(time.time() * 1000))
   total_time = (end_time - start_time)/(1000*60)
   print("Time (minutes): " + str(round(total_time, 2)))
