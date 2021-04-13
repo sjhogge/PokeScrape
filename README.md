@@ -14,8 +14,7 @@ The application ID, Public Key, and Private Key will be obtained from TCGPlayer 
 http://developer.tcgplayer.com/developer-application-form.html
 
 
-You will need to install the pandas and requests libraries to get this to work correctly:
-pip install pandas
+You will need to install the requests library to get this to work correctly:
 pip install requests
 
 Once you get everything set up, you will want to run 'get_token.py' to request a vaild Access Token that will be used to get all the sweet sweet pokemon card data.
