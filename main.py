@@ -2,7 +2,8 @@ import requests
 import json
 import math
 import time
-import pandas as pd
+import os
+import TCG_TYPE 
 
 # use this to gauge how often we are calling the API
 # because we are limited to 300 calls per minute
@@ -33,13 +34,11 @@ def get_card_info(access_token, id):
   print(card_info)
 
 # Generate a list of all sets, run this to update.
-def get_all_sets(access_token):
+def get_all_sets(access_token, requested_tcg):
   # Had to put together the two queries then remove some brackets in the resulting file to make the "allsets.json" file work
-  url = "https://api.tcgplayer.com/catalog/categories/3/groups"
+  url = "https://api.tcgplayer.com/catalog/categories/" + requested_tcg['id'] + "/groups"
   querystring1 = {"offset":"0","limit":"100"}
-  querystring2 = {"offset":"100","limit":"100"}
   headers = {"Authorization": access_token}
-  sets = []
   r = requests.request("GET", url, headers=headers, params=querystring1)
   increment_api_counter()
   info = r.json()
@@ -56,19 +55,18 @@ def get_all_sets(access_token):
       combined_info.append(i)
 
   formatted_json = json.dumps(combined_info, indent=2)
-  f = open("AllSets.json", "w")
+  filename = requested_tcg['name'] + "AllSets.json"
+  f = open(filename, "w")
   f.write(formatted_json)
   f.close()
-  # print(combined_info)
   set_name_list = []
   for i in combined_info:
     set_name_list.append(i["name"])
-  # print(set_name_list)
   return set_name_list
 
 # Get the general info of all cards on any set
-def get_set_info(access_token, set_name):
-  groupid = get_set_id(set_name)
+def get_set_info(access_token, set_name, requested_tcg):
+  groupid = get_set_id(set_name, requested_tcg)
   if groupid == None:
     return None
   url = "https://api.tcgplayer.com/catalog/products"
@@ -92,8 +90,6 @@ def get_set_info(access_token, set_name):
     temp_info = r.json()
     for i in temp_info["results"]:
       combined_info.append(i)
-
-  formatted_info = json.dumps(combined_info,indent=2)
   return combined_info
 
 # Get the price info of all cards in any set
@@ -108,13 +104,12 @@ def get_set_price_info(access_token, groupid):
   return formatted_info
 
 # Get the set ID of any set
-def get_set_id(set_name):
-  f = open("AllSets.json")
+def get_set_id(set_name, requested_tcg):
+  setlistname = requested_tcg['name'] + "AllSets.json"
+  f = open(setlistname)
   data = json.load(f)
   for i in data:
-    #print("Set Name: " + i["name"] + " --> " + "Set ID: " + str(i["groupId"]))
     if i["name"] == set_name:
-      id = i["groupId"]
       f.close()
       return i["groupId"]
   f.close()
@@ -125,7 +120,6 @@ def get_set_products(set_list):
   products_list = []
   for i in set_list:
     products_list.append({"productId": i["productId"], "Card Name": i["name"]})  
-  # print (products_list)  
   return products_list
 
 # for each batch of 100 ids, create a new search string
@@ -156,13 +150,11 @@ def get_products_price_info(access_token, product_list):
     r_temp = r.json()
     for i in r_temp["results"]:
       info.append(i)
-    # formatted_info = json.dumps(info, indent=2)
-    # print(formatted_info)
   return info
 
 # Generates and conglomorates all data of each card for a given set.
-def generate_all_set_data(access_token, set_name, write_to_file):
-  set_info = get_set_info(access_token, set_name)
+def generate_all_set_data(access_token, set_name, write_to_file, requested_tcg):
+  set_info = get_set_info(access_token, set_name, requested_tcg)
   if set_info == None:
     print("Could not find set")
     return None
@@ -177,7 +169,6 @@ def generate_all_set_data(access_token, set_name, write_to_file):
         i["setName"] = set_name
         all_data.append(i)
   all_data_f = json.dumps(all_data, indent=2)
-  # print(all_data_f)
   if write_to_file:
     filename = "SetData/" + set_name + ".json"
     filename = filename.replace(":", "")
@@ -188,33 +179,38 @@ def generate_all_set_data(access_token, set_name, write_to_file):
   return all_data
 
 if __name__ == "__main__":
+
+  ######### THIS IS THE TCG YOU WANNA PULL DATA ON ########
+  # Current options are POKEMON, YUGIOH, and MAGIC
+
+  REQUESTED_TCG = TCG_TYPE.TCG_Type.POKEMON
+
+  #########################################################
+
   ACCESS_TOKEN = get_current_access_token()
-  set_name = "SM Promos"
   write_set_to_file = False
   write_all_sets_to_file = True
   
   start_time = int(round(time.time() * 1000))
-  all_sets_list = get_all_sets(ACCESS_TOKEN)
+  all_sets_list = get_all_sets(ACCESS_TOKEN, REQUESTED_TCG)
   all_sets_data = []
 
   for i in all_sets_list:
     print(i)
-    current_set_data = generate_all_set_data(ACCESS_TOKEN, i, write_set_to_file)
+    current_set_data = generate_all_set_data(ACCESS_TOKEN, i, write_set_to_file, REQUESTED_TCG)
     if current_set_data is not None:
      all_sets_data = all_sets_data + current_set_data
     print ("-----")
 
   if write_all_sets_to_file:
-    filename = "AllSetsData"
+    filename = REQUESTED_TCG['name'] + "AllSetsData"
     filename_json = filename + ".json"
     filename_csv = filename + ".csv"
-    f = open(filename_json, "w")
+    f = open(filename_json, "w+")
     all_sets_data_f = json.dumps(all_sets_data, indent=2)
     f.write(all_sets_data_f)
     f.close()
-    df = pd.read_json(filename_json)
-    df.to_csv(filename_csv, index=None)
-    print("Data written for all sets")
+    print("Data written for all " + REQUESTED_TCG['name'] + " sets")
 
   end_time = int(round(time.time() * 1000))
   total_time = (end_time - start_time)/(1000*60)
@@ -223,8 +219,8 @@ if __name__ == "__main__":
   calls_per_minute = TOTAL_API_CALLS/total_time
   print("Number of calls per minute: " + str(round(calls_per_minute, 2)))
 
-  '''
-  What next?
-  - Combine all set data into one giant datasheet to be able to pull data from multiple sets in one request
-  - Create a way for someone to create a list of their cards, and be able to pull data on those cards
-  '''
+  ## TO DO ##
+  # Probably add more comments
+  # Automatically check to see if the bearer token is valid and generate a new one if not
+  # Add more TCGs to the TCG_TYPE class
+  # Make the requests faster without going over the limit of requests designated by TCGPlayer
