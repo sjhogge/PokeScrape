@@ -17,10 +17,9 @@ http://developer.tcgplayer.com/developer-application-form.html
 You will need to install the requests library to get this to work correctly:
 pip install requests
 
-Once you get everything set up, you will want to run 'get_token.py' to request a vaild Access Token that will be used to get all the sweet sweet pokemon card data.
-After you run that, all you have to do is run 'main.py' and *hopefully* you will start receiving all the current data from TCGPlayer!
+Once you get everything set up, all you have to do is run 'main.py' and *hopefully* you will start receiving all the current data from TCGPlayer! I've also added the capability to grab all the set data for Yugioh and Magic as well, if you enable it in main.py.
 
 If you have any question let me know on Discord here: BrooKlynOtter#1942
-I probably should have added more comments anyway....
+I probably should have added more comments....
 
-Oh yeah, if you end up using this for something let me know what you are doing with it!! This was just a fun project to learn more about the REST API and how to make requests through python. No need to pay me or anything, but if you want you can totally follow or sub to me on Twitch here: https://www.twitch.tv/BrooKlynOtter
+Oh yeah, if you end up using this for something let me know what you are doing with it!! This was just a fun project to learn more about the REST API and how to make requests through python. If you want you can totally follow or sub to me on Twitch here: https://www.twitch.tv/BrooKlynOtter

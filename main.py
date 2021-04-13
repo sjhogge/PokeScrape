@@ -4,6 +4,7 @@ import math
 import time
 import os
 import TCG_TYPE 
+import token_handler
 
 # use this to gauge how often we are calling the API
 # because we are limited to 300 calls per minute
@@ -13,14 +14,6 @@ TOTAL_API_CALLS = 0
 def increment_api_counter():
   global TOTAL_API_CALLS
   TOTAL_API_CALLS += 1
-
-# Pulls the most recent access token from the "API_Access.json" file
-def get_current_access_token():
-  f = open("API_Access.json","r")
-  client_info = json.load(f)
-  f.close() 
-  access_token = client_info["Access Token"]
-  return access_token
 
 # Request data on any single card
 def get_card_info(access_token, id):
@@ -180,15 +173,17 @@ def generate_all_set_data(access_token, set_name, write_to_file, requested_tcg):
 
 if __name__ == "__main__":
 
-  ######### THIS IS THE TCG YOU WANNA PULL DATA ON ########
+  ######### THIS IS THE TCG YOU WANT TO PULL DATA ON ########
   # Current options are POKEMON, YUGIOH, and MAGIC
 
   REQUESTED_TCG = TCG_TYPE.TCG_Type.POKEMON
+  # REQUESTED_TCG = TCG_TYPE.TCG_Type.YUGIOH
+  # REQUESTED_TCG = TCG_TYPE.TCG_Type.MAGIC
 
   #########################################################
 
-  ACCESS_TOKEN = get_current_access_token()
-  write_set_to_file = False
+  ACCESS_TOKEN = token_handler.token_check()
+  # write_set_to_file = False
   write_all_sets_to_file = True
   
   start_time = int(round(time.time() * 1000))
@@ -197,7 +192,7 @@ if __name__ == "__main__":
 
   for i in all_sets_list:
     print(i)
-    current_set_data = generate_all_set_data(ACCESS_TOKEN, i, write_set_to_file, REQUESTED_TCG)
+    current_set_data = generate_all_set_data(ACCESS_TOKEN, i, False, REQUESTED_TCG)
     if current_set_data is not None:
      all_sets_data = all_sets_data + current_set_data
     print ("-----")
@@ -221,6 +216,6 @@ if __name__ == "__main__":
 
   ## TO DO ##
   # Probably add more comments
-  # Automatically check to see if the bearer token is valid and generate a new one if not
   # Add more TCGs to the TCG_TYPE class
   # Make the requests faster without going over the limit of requests designated by TCGPlayer
+  # Moar Error Handling!!!
