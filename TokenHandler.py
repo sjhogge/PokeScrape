@@ -29,11 +29,11 @@ def get_token():
 
 # Pulls the most recent access token from the "API_Access.json" file
 def get_current_access_token():
-  f = open("API_Access.json","r")
-  client_info = json.load(f)
-  f.close() 
-  access_token = client_info["Access Token"]
-  return access_token
+    f = open("API_Access.json","r")
+    client_info = json.load(f)
+    f.close() 
+    access_token = client_info["Access Token"]
+    return access_token
 
 # Runs a call to TCGplayer to check if current token is valid
 def is_token_valid():
