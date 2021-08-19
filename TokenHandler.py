@@ -1,15 +1,22 @@
 import requests, json
+import os
 
 #https://gist.github.com/CptSpaceToaster/bf7464602aca07260d083a7747aaef97
+repl = True
 
 def get_token():
-    # Open the API_Access.json file to get public and private key
-    f = open("API_Access.json","r")
-    client_info = json.load(f)
-    f.close()
-    # client_info = access_data["access_data"]
-    client_id = client_info["Public Key"]
-    client_secret = client_info["Private Key"]
+
+    if repl:
+      cliend_id = os.environ["Public Key"]
+      client_secret = os.environ["Private Key"]
+    else:
+      # Open the API_Access.json file to get public and private key
+      f = open("API_Access.json","r")
+      client_info = json.load(f)
+      f.close()
+      # client_info = access_data["access_data"]
+      client_id = client_info["Public Key"]
+      client_secret = client_info["Private Key"]
 
     # Make request for bearer token
     url = "https://api.tcgplayer.com/token"
@@ -19,16 +26,23 @@ def get_token():
     # Parse JSON from request and build access_token
     access_token_response = r.json()
     access_token = access_token_response['token_type'] + ' ' + access_token_response['access_token']
-    client_info["Access Token"] = access_token
+    if repl:
+      os.environ["Access Token"] = access_token
+    else:
+      client_info["Access Token"] = access_token
     client_info_json = json.dumps(client_info, indent=2)
 
-    # Write access_token back to file
-    f = open("API_Access.json", "w")
-    f.write(client_info_json)
-    f.close()
+    if not repl:
+      # Write access_token back to file
+      f = open("API_Access.json", "w")
+      f.write(client_info_json)
+      f.close()
 
 # Pulls the most recent access token from the "API_Access.json" file
 def get_current_access_token():
+  if repl:
+    return os.environ["Access Token"]
+  else:
     f = open("API_Access.json","r")
     client_info = json.load(f)
     f.close() 

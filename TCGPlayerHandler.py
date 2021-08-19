@@ -79,7 +79,8 @@ class TCGPlayerHandler:
             print("Group ID not found")
             return None
         url = "https://api.tcgplayer.com/catalog/products"
-        querystring = {"groupId":groupid,"productTypes":"Cards","offset":"0","limit":"100"}
+        # querystring = {"groupId":groupid,"productTypes":"Cards","offset":"0","limit":"100"}
+        querystring = {"groupId":groupid,"offset":"0","limit":"100"}
         headers = {"Authorization": self.access_token}
         r = requests.request("GET", url, headers=headers, params=querystring)
         self.increment_api_counter()
