@@ -76,6 +76,7 @@ class TCGPlayerHandler:
     def get_set_info(self, set_name, get_extended_fields):
         groupid = self.get_set_id(set_name)
         if groupid == None:
+            print("Group ID not found")
             return None
         url = "https://api.tcgplayer.com/catalog/products"
         querystring = {"groupId":groupid,"productTypes":"Cards","offset":"0","limit":"100"}
@@ -83,15 +84,19 @@ class TCGPlayerHandler:
         r = requests.request("GET", url, headers=headers, params=querystring)
         self.increment_api_counter()
         info = r.json()
+        num_queries = 6
         combined_info = []
-        if "totalItems" not in info:
-            return None
-        print(str(info["totalItems"]) + " cards found in the set...")
-        num_queries = math.ceil(info["totalItems"]/100)
+        if "totalItems" in info:
+            print(str(info["totalItems"]) + " cards found in the set...")
+            num_queries = math.ceil(info["totalItems"]/100)
+        else:
+            print("Total Items Not found")        
+        
         for x in range(0,num_queries):
             offset = x * 100
             url = "https://api.tcgplayer.com/catalog/products"
-            querystring = {"groupId":groupid,"productTypes":"Cards","offset":offset,"limit":"100","getExtendedFields":get_extended_fields}
+            querystring = {"groupId":groupid,"offset":offset,"limit":"1000","getExtendedFields":get_extended_fields}
+            # querystring = {"groupId":groupid,"productTypes":"Cards","offset":offset,"limit":"100","getExtendedFields":get_extended_fields}
             headers = {"Authorization": self.access_token}
             r = requests.request("GET", url, headers=headers, params=querystring)
             self.increment_api_counter()
