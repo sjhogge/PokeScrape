@@ -170,6 +170,7 @@ class TCGPlayerHandler:
                 if i["productId"] == j["productId"] and (i["marketPrice"] is not None or i["lowPrice"] is not None or i["midPrice"] is not None or i["highPrice"] is not None):
                     i.update(j)
                     i["setName"] = set_name
+                    i["searchable"] = i["name"] + " " + set_name + " " + i["subTypeName"]
                     all_data.append(i)
         all_data_f = json.dumps(all_data, indent=2)
         if write_to_file:
