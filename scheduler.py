@@ -6,7 +6,7 @@ def job():
   full_update()
 
 # Run every morning at 4:00am Eastern Time
-schedule.every().day.at("8:00").do(job)
+schedule.every().day.at("08:00").do(job)
 
 while True:
     schedule.run_pending()
