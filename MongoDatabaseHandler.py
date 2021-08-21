@@ -10,7 +10,7 @@ def get_new_coll_name():
   now = datetime.now()
   current_date = now.strftime("%Y-%m-%d")
   dt_string = now.strftime("%Y-%m-%d %H:%M:%S")
-  coll_name = "TEST - Cards " + dt_string
+  coll_name = "Cards " + dt_string
 
   return coll_name, current_date
 
@@ -83,3 +83,5 @@ def run_full_db_updates():
   slim_collection(prev_coll)
 
   db_client.close()
+
+  return new_coll_name

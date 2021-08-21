@@ -2,9 +2,11 @@ from TCGPlayerHandler import TCGPlayerHandler
 from TCG_TYPE import TCG_Type
 from MongoDatabaseHandler import run_full_db_updates
 from emailer import send_email
+from WebhookHandler import send_webhook
 import TokenHandler
 import time
 import json
+import os
 
 def write_all_sets_to_file(tcgplayer, all_sets_data):
     filename = tcgplayer.requested_tcg['name'] + "AllSetsData"
@@ -18,6 +20,17 @@ def write_all_sets_to_file(tcgplayer, all_sets_data):
 
 
 def full_update():
+
+  # Send out updates
+  message = f'PokeCove Database Update Started'
+  webhook_url = os.environ["DiscordWebhook"]
+  webhook_data = {
+    "message" : message,
+    "title" : "Replit Server Update",
+    "full_message" : message
+  }
+  send_webhook(webhook_url, webhook_data, is_embed=True, color=3319890)
+
   ######### THIS IS THE TCG YOU WANT TO PULL DATA ON ########
   # Current options are POKEMON, YUGIOH, and MAGIC
 
@@ -46,21 +59,31 @@ def full_update():
       write_all_sets_to_file(tcgplayer, all_sets_data)
 
   end_time = int(round(time.time() * 1000))
-  total_time = (end_time - start_time)/(1000*60)
-  print("Time (minutes): " + str(round(total_time, 2)))
+  total_time1 = (end_time - start_time)/(1000*60)
+  print("Time (minutes): " + str(round(total_time1, 2)))
   print("Total API calls: " + str(tcgplayer.TOTAL_API_CALLS))
-  calls_per_minute = tcgplayer.TOTAL_API_CALLS/total_time
+  calls_per_minute = tcgplayer.TOTAL_API_CALLS/total_time1
   print("Number of calls per minute: " + str(round(calls_per_minute, 2)))
 
   print("Running Database Updates")
   start_time = int(round(time.time() * 1000))
-  run_full_db_updates()
+  new_coll_name = run_full_db_updates()
   end_time = int(round(time.time() * 1000))
-  total_time = (end_time - start_time)/(1000*60)
-  print("Time (minutes): " + str(round(total_time, 2)))
+  total_time2 = (end_time - start_time)/(1000*60)
+  print("Time (minutes): " + str(round(total_time2, 2)))
+  final_time = total_time1 + total_time2
 
-  message = "Pokecove Databases have been updated!"
+
+  # Send out updates
+  message = f'Pokecove Databases have been updated!\nNewest Data Collection Name: {new_coll_name}\nTime to Complete Updates: {final_time} min'
   send_email(message)
+  webhook_url = os.environ["DiscordWebhook"]
+  webhook_data = {
+    "message" : message,
+    "title" : "Replit Server Update",
+    "full_message" : message
+  }
+  send_webhook(webhook_url, webhook_data, is_embed=True, color=38655)
 
 
 if __name__ == "__main__":
