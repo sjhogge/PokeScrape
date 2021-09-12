@@ -3,6 +3,9 @@ import pymongo
 from datetime import datetime
 import os
 import json
+from DotEnvHandler import set_environ
+
+set_environ()
 
 DB_UPDATER_NAME = "DbUpdateInfo"
 

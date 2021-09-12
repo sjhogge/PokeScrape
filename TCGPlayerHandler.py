@@ -1,8 +1,7 @@
 import requests
 import json
 import math
-import TCG_TYPE
-from pprint import pprint
+from DotEnvHandler import set_environ
 
 class TCGPlayerHandler:
 
@@ -11,6 +10,7 @@ class TCGPlayerHandler:
         self.access_token = access_token
         self.TOTAL_API_CALLS = 0
         self.requested_tcg = requested_tcg
+        set_environ()
 
     def increment_api_counter(self):
         self.TOTAL_API_CALLS += 1

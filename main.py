@@ -7,6 +7,9 @@ import TokenHandler
 import time
 import json
 import os
+from DotEnvHandler import set_environ
+
+set_environ()
 
 def write_all_sets_to_file(tcgplayer, all_sets_data):
     filename = tcgplayer.requested_tcg['name'] + "AllSetsData"

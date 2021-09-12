@@ -1,5 +1,8 @@
 import smtplib, ssl
 import os
+from DotEnvHandler import set_environ
+
+set_environ()
 
 def send_email(_message):
   port = 465  # For SSL

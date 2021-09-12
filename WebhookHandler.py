@@ -1,6 +1,9 @@
 import datetime
 import requests
 import os
+from DotEnvHandler import set_environ
+
+set_environ()
 
 def send_webhook(webhook_url, data, is_embed, color):
 
